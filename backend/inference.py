@@ -1,11 +1,15 @@
-import torch
-
-model = torch.load("/home/jerry/plant_disease/backend/finalmodel.pth", map_location="cpu", weights_only=False)
-model.eval()
-
+import onnxruntime as ort
+import numpy as np
 from PIL import Image
-import torch 
 import torchvision.transforms as transforms
+import torch  
+
+session = ort.InferenceSession(
+    "/home/jerry/plant_disease/backend/model.onnx",
+    providers=["CPUExecutionProvider"]
+)
+
+input_name = session.get_inputs()[0].name
 
 classes = [
 "Apple-alternaria_leaf_spot",
@@ -81,8 +85,8 @@ classes = [
 "Watermelon_mosaic_virus"
 ]
 
-transforms=transforms.Compose([
-    transforms.Resize((224,224)),
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
@@ -91,20 +95,22 @@ transforms=transforms.Compose([
 ])
 
 def predict_image(image_path):
-    image=Image.open(image_path).convert("RGB")
-    tensor=transforms(image).unsqueeze(0)
+    image = Image.open(image_path).convert("RGB")
+    tensor = transform(image).unsqueeze(0)
 
-    with torch.no_grad():
-        output=model(tensor)
-        probabilities = torch.softmax(output, dim=1)
-    
-    predicted_class=torch.argmax(output,dim=1).item()
-    confidence=probabilities[0][predicted_class].item()
-    
-    predicted_label=classes[predicted_class]
+    input_array = tensor.numpy()
 
-    return{
-        "label":predicted_label,
-        "confidence":round(confidence*100,2)
+    outputs = session.run(None, {input_name: input_array})
+    logits = outputs[0]
+
+    probabilities = torch.softmax(torch.tensor(logits), dim=1)
+
+    predicted_class = torch.argmax(probabilities, dim=1).item()
+    confidence = probabilities[0][predicted_class].item()
+
+    predicted_label = classes[predicted_class]
+
+    return {
+        "label": predicted_label,
+        "confidence": round(confidence * 100, 2)
     }
-
