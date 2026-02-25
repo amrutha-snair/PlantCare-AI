@@ -26,7 +26,7 @@ function App() {
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch('/predict', {
+      const response = await fetch('https://plantcare-ai-2.onrender.com/predict', {
         method: 'POST',
         body: formData
       });
