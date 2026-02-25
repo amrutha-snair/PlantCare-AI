@@ -74,6 +74,7 @@ classes = [
     "Watermelon_downy_mildew",
     "Watermelon_healthy",
     "Watermelon_mosaic_virus",
+    "Watermelon_healthy",
 ]
 
 session = ort.InferenceSession("model.onnx")
@@ -108,4 +109,8 @@ def predict_image(img):
     pred = int(np.argmax(probs))
     confidence = float(np.max(probs))
 
-    return classes[pred], confidence
+    predicted_label = classes[pred]
+    return {
+        "label": predicted_label,
+        "confidence": round(confidence * 100, 2)
+    }
