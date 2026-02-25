@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 import torch  
 
 session = ort.InferenceSession(
-    "/home/jerry/plant_disease/backend/model.onnx",
+    "model.onnx",
     providers=["CPUExecutionProvider"]
 )
 
