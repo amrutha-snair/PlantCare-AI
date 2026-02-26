@@ -41,6 +41,10 @@ npm run dev
 ```
 *The app will be available at `http://localhost:5173`*
 
+### Deployed
+- Frontend deployed in Vercel
+- Backend deployed in Render
+
 ## Usage
 1. Open the frontend in your browser.
 2. Click the leaf icon or drag and drop a plant image.
